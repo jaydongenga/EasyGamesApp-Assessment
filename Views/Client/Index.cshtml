@@ -1,0 +1,288 @@
+﻿@model EasyGamesApp.Models.ClientViewModel
+
+@{
+    ViewData["Title"] = "EasyGames Transaction Manager";
+}
+
+<style>
+    :root {
+        --gold: #c9a84c;
+        --gold-light: #f0d080;
+        --dark: #1a1a2e;
+        --darker: #12121f;
+        --card-bg: #16213e;
+        --card-border: #2a2a4a;
+    }
+    body { background: var(--darker); color: #e0e0e0; min-height: 100vh; }
+    .eg-header { background: linear-gradient(135deg, var(--dark) 0%, #0f3460 100%); border-bottom: 2px solid var(--gold); padding: 1.2rem 2rem; display: flex; align-items: center; gap: 1rem; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+    .eg-logo { width: 48px; height: 48px; border: 2px solid var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: var(--gold); background: rgba(201,168,76,0.1); }
+    .eg-title { font-size: 1.5rem; font-weight: 600; color: #fff; margin: 0; }
+    .eg-subtitle { font-size: 0.8rem; color: var(--gold); margin: 0; letter-spacing: 0.1em; text-transform: uppercase; }
+    .eg-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .eg-card-title { font-size: 0.75rem; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--card-border); }
+    .eg-input { background: #0f0f1a; border: 1px solid var(--card-border); border-radius: 8px; color: #e0e0e0; padding: 0.5rem 0.9rem; width: 100%; transition: border-color 0.2s; }
+    .eg-input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px rgba(201,168,76,0.2); background: #0f0f1a; color: #e0e0e0; }
+    .eg-select { background: #0f0f1a; border: 1px solid var(--card-border); border-radius: 8px; color: #e0e0e0; padding: 0.5rem 0.9rem; width: 100%; transition: border-color 0.2s; }
+    .eg-select:focus { outline: none; border-color: var(--gold); }
+    .eg-select option { background: #1a1a2e; }
+    .btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: #1a1a2e; border: none; border-radius: 8px; padding: 0.5rem 1.2rem; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; cursor: pointer; }
+    .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(201,168,76,0.4); }
+    .btn-outline-gold { background: transparent; border: 1px solid var(--gold); color: var(--gold); border-radius: 8px; padding: 0.35rem 0.9rem; font-size: 0.8rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+    .btn-outline-gold:hover { background: var(--gold); color: #1a1a2e; }
+    .client-item { background: #0f0f1a; border: 1px solid var(--card-border); border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; text-decoration: none; color: #e0e0e0; }
+    .client-item:hover { border-color: var(--gold); transform: translateX(4px); color: #fff; }
+    .client-item.active { border-color: var(--gold); background: rgba(201,168,76,0.1); color: #fff; }
+    .client-name { font-weight: 500; font-size: 0.95rem; }
+    .client-balance { font-size: 0.8rem; color: var(--gold); font-weight: 600; }
+    .balance-display { background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05)); border: 1px solid var(--gold); border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .balance-label { font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.1em; }
+    .balance-amount { font-size: 1.8rem; font-weight: 700; color: var(--gold); }
+    .balance-name { font-size: 1rem; font-weight: 600; color: #fff; }
+    .eg-table { width: 100%; border-collapse: separate; border-spacing: 0 4px; }
+    .eg-table thead th { font-size: 0.7rem; font-weight: 600; color: var(--gold); text-transform: uppercase; letter-spacing: 0.1em; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--card-border); }
+    .eg-table tbody tr { background: #0f0f1a; transition: background 0.2s; }
+    .eg-table tbody tr:hover { background: #1a1a2e; }
+    .eg-table tbody td { padding: 0.65rem 0.75rem; font-size: 0.875rem; border-top: 1px solid var(--card-border); }
+    .badge-debit { background: rgba(220,53,69,0.2); color: #ff6b7a; border: 1px solid rgba(220,53,69,0.3); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+    .badge-credit { background: rgba(40,167,69,0.2); color: #5dde7a; border: 1px solid rgba(40,167,69,0.3); border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; font-weight: 600; }
+    .amount-debit { color: #ff6b7a; font-weight: 600; }
+    .amount-credit { color: #5dde7a; font-weight: 600; }
+    .form-label-eg { font-size: 0.78rem; color: #aaa; font-weight: 500; margin-bottom: 4px; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
+    .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; }
+    .modal-header { border-bottom: 1px solid var(--card-border); }
+    .modal-footer { border-top: 1px solid var(--card-border); }
+    .modal-title { color: var(--gold); font-size: 1rem; font-weight: 600; }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: #555; }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+</style>
+
+<div class="eg-header">
+    <div class="eg-logo">E</div>
+    <div>
+        <p class="eg-title">EasyGames</p>
+        <p class="eg-subtitle">Transaction Manager</p>
+    </div>
+</div>
+
+<div class="container-fluid px-3 px-md-4 py-4">
+    <div class="row g-4">
+
+        <div class="col-12 col-md-4 col-lg-3">
+            <div class="eg-card">
+                <div class="eg-card-title">🔍 Search Clients</div>
+                <form method="get" asp-action="Index">
+                    <input type="hidden" name="clientID" value="@Model.SelectedClientID" />
+                    <div class="mb-2">
+                        <input type="text" name="searchTerm" value="@Model.SearchTerm" placeholder="Search by name..." class="eg-input" />
+                    </div>
+                    <div class="mb-3">
+                        <select name="sortOrder" class="eg-select">
+
+                            @if (Model.SortOrder == "name_asc")
+                            {
+                                <option value="name_asc" selected>Name A → Z</option>
+                            }
+                            else
+                            {
+                                <option value="name_asc">Name A → Z</option>
+                            }
+
+                            @if (Model.SortOrder == "name_desc")
+                            {
+                                <option value="name_desc" selected>Name Z → A</option>
+                            }
+                            else
+                            {
+                                <option value="name_desc">Name Z → A</option>
+                            }
+
+                            @if (Model.SortOrder == "balance_desc")
+                            {
+                                <option value="balance_desc" selected>Balance High → Low</option>
+                            }
+                            else
+                            {
+                                <option value="balance_desc">Balance High → Low</option>
+                            }
+
+                            @if (Model.SortOrder == "balance_asc")
+                            {
+                                <option value="balance_asc" selected>Balance Low → High</option>
+                            }
+                            else
+                            {
+                                <option value="balance_asc">Balance Low → High</option>
+                            }
+
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-gold w-100">Apply</button>
+                </form>
+            </div>
+
+            <div class="eg-card">
+                <div class="eg-card-title">👥 Clients (@Model.Clients.Count)</div>
+                @if (!Model.Clients.Any())
+                {
+                    <div class="empty-state"><div class="icon">👤</div><p>No clients found</p></div>
+                }
+                else
+                {
+                    @foreach (var client in Model.Clients)
+                    {
+                        <a href="?clientID=@client.ClientID&searchTerm=@Model.SearchTerm&sortOrder=@Model.SortOrder"
+                           class="client-item @(Model.SelectedClientID == client.ClientID ? "active" : "")">
+                            <div>
+                                <div class="client-name">@client.FullName</div>
+                                <div style="font-size:0.75rem;color:#888;">ID: @client.ClientID</div>
+                            </div>
+                            <div class="client-balance">R @client.ClientBalance.ToString("N2")</div>
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-12 col-md-8 col-lg-9">
+            @if (Model.SelectedClient == null)
+            {
+                <div class="eg-card">
+                    <div class="empty-state">
+                        <div class="icon">👈</div>
+                        <h5 style="color:#888;">Select a client to view transactions</h5>
+                        <p style="color:#555;font-size:0.9rem;">Click any client from the list on the left</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="balance-display">
+                    <div>
+                        <div class="balance-label">Selected Client</div>
+                        <div class="balance-name">@Model.SelectedClient.FullName</div>
+                        <div style="font-size:0.75rem;color:#888;margin-top:2px;">Client ID: @Model.SelectedClient.ClientID</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="balance-label">Current Balance</div>
+                        <div class="balance-amount">R @Model.SelectedClient.ClientBalance.ToString("N2")</div>
+                    </div>
+                </div>
+
+                <div class="eg-card">
+                    <div class="eg-card-title">➕ Add New Transaction</div>
+                    <form method="post" asp-action="AddTransaction">
+                        <input type="hidden" name="clientID"   value="@Model.SelectedClientID" />
+                        <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                        <input type="hidden" name="sortOrder"  value="@Model.SortOrder" />
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label-eg">Amount (R)</label>
+                                <input type="number" name="amount" step="0.01" min="0.01" placeholder="e.g. 500.00" class="eg-input" required />
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label-eg">Transaction Type</label>
+                                <select name="transactionTypeID" class="eg-select" required>
+                                    @foreach (var tt in Model.TransactionTypes)
+                                    {
+                                        <option value="@tt.TransactionTypeID">@tt.TransactionTypeName</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label-eg">Comment (optional)</label>
+                                <input type="text" name="comment" maxlength="100" placeholder="e.g. Winnings" class="eg-input" />
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button type="submit" class="btn-gold">Add Transaction</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="eg-card">
+                    <div class="eg-card-title">📋 Transactions (@Model.Transactions.Count)</div>
+                    @if (!Model.Transactions.Any())
+                    {
+                        <div class="empty-state">
+                            <div class="icon">📭</div>
+                            <p>No transactions yet for this client</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="eg-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Comment</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var t in Model.Transactions)
+                                    {
+                                        <tr>
+                                            <td style="color:#888;">#@t.TransactionID</td>
+                                            <td>
+                                                @if (t.TransactionTypeName == "Debit")
+                                                { <span class="badge-debit">Debit</span> }
+                                                else
+                                                { <span class="badge-credit">Credit</span> }
+                                            </td>
+                                            <td class="@(t.TransactionTypeName == "Debit" ? "amount-debit" : "amount-credit")">
+                                                @(t.TransactionTypeName == "Debit" ? "-" : "+")R @Math.Abs(t.Amount).ToString("N2")
+                                            </td>
+                                            <td style="color:#bbb;">@(string.IsNullOrEmpty(t.Comment) ? "—" : t.Comment)</td>
+                                            <td>
+                                                <button class="btn-outline-gold" onclick="openEditModal(@t.TransactionID, '@Html.Raw(t.Comment?.Replace("'", "\\'") ?? "")')">
+                                                    ✏ Edit
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">✏ Edit Comment</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="UpdateComment">
+                <div class="modal-body">
+                    <input type="hidden" name="transactionID" id="editTransactionID" />
+                    <input type="hidden" name="clientID"      value="@Model.SelectedClientID" />
+                    <input type="hidden" name="searchTerm"    value="@Model.SearchTerm" />
+                    <input type="hidden" name="sortOrder"     value="@Model.SortOrder" />
+                    <label class="form-label-eg">Comment</label>
+                    <input type="text" name="comment" id="editComment" maxlength="100" class="eg-input" placeholder="Enter comment..." />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-outline-gold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-gold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openEditModal(transactionID, comment) {
+        document.getElementById('editTransactionID').value = transactionID;
+        document.getElementById('editComment').value = comment;
+        var modal = new bootstrap.Modal(document.getElementById('editModal'));
+        modal.show();
+    }
+</script>
